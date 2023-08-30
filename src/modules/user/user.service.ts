@@ -15,11 +15,9 @@ export class UserService {
 
     if (userExists) throw new Error('Email already in use');
 
-    const user = await this.prisma.user.create({
+    return await this.prisma.user.create({
       data,
     });
-
-    return user;
   }
 
   async findAll() {
@@ -34,7 +32,7 @@ export class UserService {
     return userExists;
   }
 
-  async update(id: string, data: Prisma.UserCreateInput) {
+  async update(id: string, data: Prisma.UserUpdateInput) {
     const userExists = await this.prisma.user.findUnique({ where: { id } });
 
     if (!userExists) throw new Error("User doesn't exists");
@@ -47,6 +45,8 @@ export class UserService {
 
     if (!userExists) throw new Error("User doesn't exists");
 
-    return await this.prisma.user.delete({ where: { id } });
+    await this.prisma.user.delete({ where: { id } });
+
+    return { success: `User '${userExists.name}' deleted` };
   }
 }

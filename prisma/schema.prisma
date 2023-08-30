@@ -14,6 +14,20 @@ model User {
   password String
   address String
   balance Decimal @db.Decimal(9,2)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt @default(now())
 
   @@map("users")
+}
+
+model Product {
+  id String @id @default(uuid())
+  title String
+  description String
+  price Decimal @db.Decimal(9,2)
+  image_urls String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt @default(now())
+
+  @@map("products")
 }

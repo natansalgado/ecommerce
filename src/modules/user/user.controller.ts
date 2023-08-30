@@ -30,7 +30,7 @@ export class UserController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() data: Prisma.UserCreateInput) {
+  async update(@Param('id') id: string, @Body() data: Prisma.UserUpdateInput) {
     return this.userService.update(id, data);
   }
 
