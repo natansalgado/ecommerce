@@ -14,8 +14,10 @@ model User {
   password String
   address String
   balance Decimal @db.Decimal(9,2)
+  carts       Cart[]
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt @default(now())
+
 
   @@map("users")
 }
@@ -26,8 +28,36 @@ model Product {
   description String
   price Decimal @db.Decimal(9,2)
   image_urls String
+  ratings Int @default(0)
+  stars Int @default(0)
+  sold Int @default(0)
+  carts       CartItem[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt @default(now())
 
   @@map("products")
+}
+
+model Cart {
+  id String @id @default(uuid())
+  user_id String
+  items CartItem[]
+  user User @relation(fields: [user_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt @default(now())
+
+  @@map("carts")
+}
+
+model CartItem {
+  id String @id @default(uuid())
+  cart_id String
+  product_id String
+  quantity Int
+  cart Cart @relation(fields: [cart_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt @default(now())
+
+  @@map("cartItems")
 }
