@@ -6,10 +6,9 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  MinLength,
 } from 'class-validator';
 
-export class CreateUserDto {
+export class CreateUserDTO {
   @ApiProperty()
   @IsOptional()
   @IsString()
@@ -28,7 +27,6 @@ export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @MinLength(8)
   password: string;
 
   @ApiProperty()
@@ -49,9 +47,4 @@ export class CreateUserDto {
   @IsOptional() // O campo é opcional
   @IsDate()
   updated_at?: Date;
-
-  constructor(partial: Partial<CreateUserDto>) {
-    Object.assign(this, partial);
-    this.balance = 0;
-  }
 }

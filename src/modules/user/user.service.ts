@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { UpdateUserDTO } from './dto/update-user.dto';
 
 export const roundsOfHashing = 10;
 
@@ -10,7 +10,10 @@ export const roundsOfHashing = 10;
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: CreateUserDto) {
+  async create(data: CreateUserDTO) {
+    if (data.password.length < 8)
+      throw new Error('Password must be at least 8 characters long');
+
     const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
 
     data.password = hashedPassword;
@@ -41,7 +44,7 @@ export class UserService {
     return userExists;
   }
 
-  async update(id: string, data: UpdateUserDto) {
+  async update(id: string, data: UpdateUserDTO) {
     if (data.password) {
       const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
       data.password = hashedPassword;
