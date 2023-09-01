@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  NotAcceptableException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -11,8 +16,11 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: CreateUserDTO) {
-    if (data.password.length < 8)
-      throw new Error('Password must be at least 8 characters long');
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(data.password))
+      throw new NotAcceptableException(
+        'The password must have at least 8 characters, including one uppercase letter, one lowercase letter, and one number',
+      );
 
     const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
 
@@ -25,7 +33,7 @@ export class UserService {
       },
     });
 
-    if (userExists) throw new Error('Email already in use');
+    if (userExists) throw new ConflictException('Email already in use');
 
     return await this.prisma.user.create({
       data,
@@ -39,7 +47,7 @@ export class UserService {
   async findOne(id: string) {
     const userExists = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!userExists) throw new Error("User doesn't exists");
+    if (!userExists) throw new NotFoundException("User doesn't exists");
 
     return userExists;
   }
@@ -52,7 +60,7 @@ export class UserService {
 
     const userExists = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!userExists) throw new Error("User doesn't exists");
+    if (!userExists) throw new NotFoundException("User doesn't exists");
 
     return await this.prisma.user.update({ data, where: { id } });
   }
@@ -60,7 +68,7 @@ export class UserService {
   async delete(id: string) {
     const userExists = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!userExists) throw new Error("User doesn't exists");
+    if (!userExists) throw new NotFoundException("User doesn't exists");
 
     await this.prisma.user.delete({ where: { id } });
 

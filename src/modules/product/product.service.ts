@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import { CreateProductDTO } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
@@ -8,6 +8,9 @@ export class ProductService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: CreateProductDTO) {
+    data.ratings = 0;
+    data.stars = 0;
+    data.sold = 0;
     return await this.prisma.product.create({
       data,
     });
@@ -22,7 +25,7 @@ export class ProductService {
       where: { id },
     });
 
-    if (!productExists) throw new Error("Product doesn't exists");
+    if (!productExists) throw new NotFoundException("Product doesn't exists");
 
     return productExists;
   }
@@ -32,7 +35,7 @@ export class ProductService {
       where: { id },
     });
 
-    if (!productExists) throw new Error("Product doesn't exists");
+    if (!productExists) throw new NotFoundException("Product doesn't exists");
 
     return await this.prisma.product.update({ data, where: { id } });
   }
@@ -42,7 +45,7 @@ export class ProductService {
       where: { id },
     });
 
-    if (!productExists) throw new Error("Product doesn't exists");
+    if (!productExists) throw new NotFoundException("Product doesn't exists");
 
     await this.prisma.product.delete({ where: { id } });
 

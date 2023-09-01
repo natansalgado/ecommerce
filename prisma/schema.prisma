@@ -13,8 +13,8 @@ model User {
   email String @unique
   password String
   address String
-  balance Decimal @db.Decimal(9,2)
-  carts       Cart[]
+  balance Decimal @db.Decimal(9,2) @default(0)
+  carts Cart[]
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt @default(now())
 
