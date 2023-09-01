@@ -9,16 +9,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body() data: Prisma.UserCreateInput) {
+  async create(@Body() data: CreateUserDto) {
     return this.userService.create(data);
   }
 
@@ -39,7 +40,7 @@ export class UserController {
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async update(@Param('id') id: string, @Body() data: Prisma.UserCreateInput) {
+  async update(@Param('id') id: string, @Body() data: UpdateUserDto) {
     return this.userService.update(id, data);
   }
 
