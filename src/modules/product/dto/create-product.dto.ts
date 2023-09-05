@@ -1,7 +1,19 @@
-import { IsNotEmpty, IsString, IsDecimal, IsInt } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsDecimal,
+  IsInt,
+  IsOptional,
+  IsDate,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDTO {
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  id?: string;
+
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
@@ -33,4 +45,13 @@ export class CreateProductDTO {
   @ApiProperty()
   @IsInt()
   sold: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsDate()
+  created_at?: Date;
+
+  @IsOptional()
+  @IsDate()
+  updated_at?: Date;
 }

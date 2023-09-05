@@ -40,11 +40,11 @@ export class CreateUserDTO {
   balance: number;
 
   @ApiProperty()
-  @IsOptional() // O campo é opcional
+  @IsOptional()
   @IsDate()
   created_at?: Date;
 
-  @IsOptional() // O campo é opcional
+  @IsOptional()
   @IsDate()
   updated_at?: Date;
 }

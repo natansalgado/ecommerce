@@ -8,55 +8,59 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  name String
-  email String @unique
-  password String
-  address String
-  balance Decimal @db.Decimal(9,2) @default(0)
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  address    String
+  balance    Decimal  @default(0) @db.Decimal(9, 2)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   carts Cart[]
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt @default(now())
 
   @@map("users")
 }
 
 model Product {
-  id String @id @default(uuid())
-  title String
+  id          String  @id @default(uuid())
+  title       String
   description String
-  price Decimal @db.Decimal(9,2)
-  image_urls String
-  ratings Int @default(0)
-  stars Int @default(0)
-  sold Int @default(0)
-  carts       CartItem[]
+  price       Decimal @db.Decimal(9, 2)
+  image_urls  String
+  ratings     Int     @default(0)
+  stars       Int     @default(0)
+  sold        Int     @default(0)
+
+  carts CartItem[]
+
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("products")
 }
 
 model Cart {
-  id String @id @default(uuid())
-  user_id String
-  items CartItem[]
-  user User @relation(fields: [user_id], references: [id])
+  id         String   @id @default(uuid())
+  user_id    String
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt @default(now())
+  updated_at DateTime @updatedAt
+
+  user      User       @relation(fields: [user_id], references: [id])
+  cartItems CartItem[]
 
   @@map("carts")
 }
 
 model CartItem {
-  id String @id @default(uuid())
-  cart_id String
+  id         String @id @default(uuid())
+  cart_id    String
   product_id String
-  quantity Int
-  cart Cart @relation(fields: [cart_id], references: [id])
-  product Product @relation(fields: [product_id], references: [id])
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt @default(now())
+  quantity   Int
 
+  cart    Cart    @relation(fields: [cart_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@unique([cart_id, product_id])
   @@map("cartItems")
 }
