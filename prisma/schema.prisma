@@ -42,9 +42,10 @@ model Product {
 
 model Cart {
   id         String   @id @default(uuid())
-  user_id    String
+  user_id    String @unique
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  total_price Decimal  @default(0) @db.Decimal(9, 2)
 
   user      User       @relation(fields: [user_id], references: [id])
   cartItems CartItem[]

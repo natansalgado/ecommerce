@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import { UpdateUserDTO } from '../user/dto/update-user.dto';
+import { CartItemDTO } from './dto/cartItem.dto';
 
 @Injectable()
 export class CartService {
@@ -29,44 +30,92 @@ export class CartService {
       where: { cart_id: cart.id, product_id: productId },
     });
 
-    if (cartItemExists) {
-      await this.prisma.cartItem.update({
-        where: { id: cartItemExists.id },
-        data: { quantity: cartItemExists.quantity + quantity },
-      });
+    let cartItem: CartItemDTO;
 
-      if (
-        await this.deleteCartItem(
-          cartItemExists.quantity,
-          quantity,
-          cartItemExists.id,
-        )
-      ) {
-        return { removed: { name: product.title } };
-      }
+    if (cartItemExists) {
+      cartItem = await this.prisma.cartItem.update({
+        where: { id: cartItemExists.id },
+        data: {
+          quantity: { increment: quantity },
+        },
+      });
     } else {
-      const cartItem = await this.prisma.cartItem.create({
+      cartItem = await this.prisma.cartItem.create({
         data: {
           cart: { connect: { id: cart.id } },
           product: { connect: { id: productId } },
           quantity,
         },
       });
-
-      if (await this.deleteCartItem(cartItem.quantity, quantity, cartItem.id)) {
-        return { removed: { name: product.title } };
-      }
     }
 
-    return { added: { name: product.title, quantity } };
+    const itemRemoved = await this.deleteCartItem(cartItem.id);
+
+    await this.setTotalPrice(cart.id);
+
+    if (itemRemoved) return { removed: { name: product.title } };
+
+    return {
+      added: { name: product.title, quantity },
+      currentQuantity: cartItem.quantity,
+    };
   }
 
-  async deleteCartItem(
-    currentQuantity: number,
-    addQuantity: number,
-    cartItemId: string,
-  ) {
-    if (currentQuantity + addQuantity <= 0) {
+  async emptyCart(user: UpdateUserDTO) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { user_id: user.id },
+    });
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { total_price: 0 },
+    });
+
+    await this.prisma.cartItem.deleteMany({
+      where: { cart_id: cart.id },
+    });
+
+    return { message: 'Cart emptied' };
+  }
+
+  async getCartItems(user: UpdateUserDTO) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { user_id: user.id },
+      include: { cartItems: true },
+    });
+
+    return cart;
+  }
+
+  async setTotalPrice(cartID: string) {
+    const cartItems = await this.prisma.cartItem.findMany({
+      where: { cart_id: cartID },
+    });
+
+    let totalPrice = 0;
+
+    await Promise.all(
+      cartItems.map(async (item) => {
+        const product = await this.prisma.product.findUnique({
+          where: { id: item.product_id },
+        });
+
+        totalPrice += Number(product.price) * item.quantity;
+      }),
+    );
+
+    await this.prisma.cart.update({
+      where: { id: cartID },
+      data: { total_price: totalPrice },
+    });
+  }
+
+  async deleteCartItem(cartItemId: string) {
+    const cartItem = await this.prisma.cartItem.findUnique({
+      where: { id: cartItemId },
+    });
+
+    if (cartItem.quantity <= 0) {
       await this.prisma.cartItem.delete({ where: { id: cartItemId } });
       return true;
     } else {
