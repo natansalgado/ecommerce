@@ -47,6 +47,16 @@ export class CreateProductDTO {
   sold: number;
 
   @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  vendor_id: string;
+
+  @ApiProperty()
+  @IsInt()
+  @IsNotEmpty()
+  quantity: number;
+
+  @ApiProperty()
   @IsOptional()
   @IsDate()
   created_at?: Date;

@@ -6,18 +6,28 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+import express from 'express';
 import { ProductService } from './product.service';
 import { CreateProductDTO } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  async create(@Body() data: CreateProductDTO) {
-    return this.productService.create(data);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async create(
+    @Request() req: express.Request,
+    @Body() data: CreateProductDTO,
+  ) {
+    return this.productService.create(data, req.user);
   }
 
   @Get()
@@ -31,12 +41,20 @@ export class ProductController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() data: UpdateProductDTO) {
-    return this.productService.update(id, data);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async update(
+    @Request() req: express.Request,
+    @Param('id') id: string,
+    @Body() data: UpdateProductDTO,
+  ) {
+    return this.productService.update(id, data, req.user);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return this.productService.delete(id);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async delete(@Request() req: express.Request, @Param('id') id: string) {
+    return this.productService.delete(id, req.user);
   }
 }

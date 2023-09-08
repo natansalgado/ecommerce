@@ -16,8 +16,10 @@ model User {
   balance    Decimal  @default(0) @db.Decimal(9, 2)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  admin      Boolean  @default(false)
 
-  carts Cart[]
+  carts   Cart[]
+  Product Product[]
 
   @@map("users")
 }
@@ -31,8 +33,11 @@ model Product {
   ratings     Int     @default(0)
   stars       Int     @default(0)
   sold        Int     @default(0)
+  vendor_id   String
+  quantity    Int
 
-  carts CartItem[]
+  carts  CartItem[]
+  vendor User       @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -41,13 +46,13 @@ model Product {
 }
 
 model Cart {
-  id         String   @id @default(uuid())
-  user_id    String @unique
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
   total_price Decimal  @default(0) @db.Decimal(9, 2)
 
-  user      User       @relation(fields: [user_id], references: [id])
+  user      User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   cartItems CartItem[]
 
   @@map("carts")
@@ -59,8 +64,8 @@ model CartItem {
   product_id String
   quantity   Int
 
-  cart    Cart    @relation(fields: [cart_id], references: [id])
-  product Product @relation(fields: [product_id], references: [id])
+  cart    Cart    @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@unique([cart_id, product_id])
   @@map("cartItems")

@@ -1,4 +1,5 @@
 import {
+  Request,
   Body,
   Controller,
   Delete,
@@ -19,35 +20,39 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body() data: CreateUserDTO) {
+  create(@Body() data: CreateUserDTO) {
     return this.userService.create(data);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async findAll() {
+  findAll() {
     return this.userService.findAll();
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async update(@Param('id') id: string, @Body() data: UpdateUserDTO) {
-    return this.userService.update(id, data);
+  update(
+    @Request() req: Express.Request,
+    @Param('id') id: string,
+    @Body() data: UpdateUserDTO,
+  ) {
+    return this.userService.update(id, data, req.user);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  async delete(@Param('id') id: string) {
-    return this.userService.delete(id);
+  delete(@Request() req: Express.Request, @Param('id') id: string) {
+    return this.userService.delete(id, req.user);
   }
 }

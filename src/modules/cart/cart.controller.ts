@@ -10,13 +10,15 @@ import {
 import { CartService } from './cart.service';
 import express from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post('add')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   addItem(
     @Request() req: express.Request,
     @Body() data: { productId: string; quantity: number },
@@ -24,14 +26,16 @@ export class CartController {
     return this.cartService.addItem(req.user, data.productId, data.quantity);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete('empty')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   emptyCart(@Request() req: express.Request) {
     return this.cartService.emptyCart(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   getCartItems(@Request() req: express.Request) {
     return this.cartService.getCartItems(req.user);
   }

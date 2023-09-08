@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsDate,
   IsDecimal,
   IsEmail,
@@ -37,7 +38,12 @@ export class CreateUserDTO {
   @ApiProperty()
   @IsOptional()
   @IsDecimal({ decimal_digits: '2' })
-  balance: number;
+  balance?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  admin: boolean;
 
   @ApiProperty()
   @IsOptional()
