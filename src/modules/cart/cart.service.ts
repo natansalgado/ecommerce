@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import { UpdateUserDTO } from '../user/dto/update-user.dto';
 import { CartItemDTO } from './dto/cartItem.dto';
@@ -37,6 +41,7 @@ export class CartService {
         where: { id: cartItemExists.id },
         data: {
           quantity: { increment: quantity },
+          price: { increment: Number(product.price) * quantity },
         },
       });
     } else {
@@ -45,13 +50,17 @@ export class CartService {
           cart: { connect: { id: cart.id } },
           product: { connect: { id: productId } },
           quantity,
+          price: Number(product.price) * quantity,
         },
       });
     }
 
+    if (product.quantity < cartItem.quantity)
+      throw new BadRequestException('Insufficient product quantity');
+
     const itemRemoved = await this.deleteCartItem(cartItem.id);
 
-    await this.setTotalPrice(cart.id);
+    await this.calcTotalPrice(cart.id);
 
     if (itemRemoved) return { removed: { name: product.title } };
 
@@ -87,7 +96,7 @@ export class CartService {
     return cart;
   }
 
-  async setTotalPrice(cartID: string) {
+  async calcTotalPrice(cartID: string) {
     const cartItems = await this.prisma.cartItem.findMany({
       where: { cart_id: cartID },
     });
@@ -96,11 +105,7 @@ export class CartService {
 
     await Promise.all(
       cartItems.map(async (item) => {
-        const product = await this.prisma.product.findUnique({
-          where: { id: item.product_id },
-        });
-
-        totalPrice += Number(product.price) * item.quantity;
+        totalPrice += Number(item.price);
       }),
     );
 

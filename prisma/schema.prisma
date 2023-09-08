@@ -8,18 +8,20 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  password   String
-  address    String
-  balance    Decimal  @default(0) @db.Decimal(9, 2)
+  id       String  @id @default(uuid())
+  name     String
+  email    String  @unique
+  password String
+  address  String
+  balance  Decimal @default(0) @db.Decimal(9, 2)
+  admin    Boolean @default(false)
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  admin      Boolean  @default(false)
 
-  carts   Cart[]
-  Product Product[]
+  carts     Cart[]
+  products  Product[]
+  historics Historic[]
 
   @@map("users")
 }
@@ -36,37 +38,71 @@ model Product {
   vendor_id   String
   quantity    Int
 
-  carts  CartItem[]
-  vendor User       @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
-
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  carts          CartItem[]
+  historic_items HistoricItem[]
+
+  vendor User @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
 
   @@map("products")
 }
 
 model Cart {
-  id          String   @id @default(uuid())
-  user_id     String   @unique
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  total_price Decimal  @default(0) @db.Decimal(9, 2)
+  id          String  @id @default(uuid())
+  user_id     String  @unique
+  total_price Decimal @default(0) @db.Decimal(9, 2)
 
-  user      User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   cartItems CartItem[]
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("carts")
 }
 
 model CartItem {
-  id         String @id @default(uuid())
+  id         String  @id @default(uuid())
   cart_id    String
   product_id String
   quantity   Int
+  price      Decimal @db.Decimal(9, 2)
 
   cart    Cart    @relation(fields: [cart_id], references: [id], onDelete: Cascade)
   product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@unique([cart_id, product_id])
   @@map("cartItems")
+}
+
+model Historic {
+  id          String  @id @default(uuid())
+  user_id     String
+  total_price Decimal @db.Decimal(9, 2)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  historic_items HistoricItem[]
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("historics")
+}
+
+model HistoricItem {
+  id          String  @id @default(uuid())
+  product_id  String
+  historic_id String
+  quantity    Int
+  price       Decimal @db.Decimal(9, 2)
+
+  product  Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  historic Historic @relation(fields: [historic_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, historic_id])
+  @@map("historicItems")
 }
