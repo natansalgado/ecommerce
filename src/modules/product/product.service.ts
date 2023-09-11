@@ -13,10 +13,17 @@ export class ProductService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: CreateProductDTO, user: UpdateUserDTO) {
+    const store = await this.prisma.store.findUnique({
+      where: { owner_id: user.id },
+    });
+
+    if (!store) throw new NotFoundException("Store doesn't exists");
+
     data.ratings = 0;
     data.stars = 0;
     data.sold = 0;
-    data.vendor_id = user.id;
+    data.store_id = store.id;
+
     return await this.prisma.product.create({
       data,
     });
@@ -43,9 +50,15 @@ export class ProductService {
 
     if (!productExists) throw new NotFoundException("Product doesn't exists");
 
-    if (!(productExists.vendor_id === user.id || user.admin))
+    const store = await this.prisma.store.findUnique({
+      where: { owner_id: user.id },
+    });
+
+    if (!store) throw new NotFoundException("Store doesn't exists");
+
+    if (!(productExists.store_id === store.id || user.admin))
       throw new UnauthorizedException(
-        'Only the vendor or an admin can update the product',
+        'Only the store owner or an admin can update the product',
       );
 
     return await this.prisma.product.update({ data, where: { id } });
@@ -58,9 +71,15 @@ export class ProductService {
 
     if (!productExists) throw new NotFoundException("Product doesn't exists");
 
-    if (!(productExists.vendor_id === user.id || user.admin))
+    const store = await this.prisma.store.findUnique({
+      where: { owner_id: user.id },
+    });
+
+    if (!store) throw new NotFoundException("Store doesn't exists");
+
+    if (!(productExists.store_id === store.id || user.admin))
       throw new UnauthorizedException(
-        'Only the vendor or an admin can delete the product',
+        'Only the store owner or an admin can delete the product',
       );
 
     await this.prisma.product.delete({ where: { id } });

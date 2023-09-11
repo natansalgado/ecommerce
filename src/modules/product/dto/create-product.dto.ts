@@ -49,7 +49,7 @@ export class CreateProductDTO {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  vendor_id: string;
+  store_id: string;
 
   @ApiProperty()
   @IsInt()

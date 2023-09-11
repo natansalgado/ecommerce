@@ -19,9 +19,10 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  carts     Cart[]
-  products  Product[]
-  historics Historic[]
+  carts       Cart[]
+  historics   Historic[]
+  store       Store?
+  saleHistory SaleHistory[]
 
   @@map("users")
 }
@@ -35,7 +36,7 @@ model Product {
   ratings     Int     @default(0)
   stars       Int     @default(0)
   sold        Int     @default(0)
-  vendor_id   String
+  store_id    String
   quantity    Int
 
   created_at DateTime @default(now())
@@ -43,8 +44,9 @@ model Product {
 
   carts          CartItem[]
   historic_items HistoricItem[]
+  saleHistory    SaleHistory?
 
-  vendor User @relation(fields: [vendor_id], references: [id], onDelete: Cascade)
+  store Store? @relation(fields: [store_id], references: [id], onDelete: Cascade)
 
   @@map("products")
 }
@@ -105,4 +107,31 @@ model HistoricItem {
 
   @@unique([product_id, historic_id])
   @@map("historicItems")
+}
+
+model Store {
+  id       String  @id @default(uuid())
+  name     String
+  owner_id String  @unique
+  balance  Decimal @db.Decimal(9, 2)
+
+  products    Product[]
+  saleHistory SaleHistory[]
+
+  owner User @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+
+  @@map("Stores")
+}
+
+model SaleHistory {
+  id         String @id @default(uuid())
+  store_id   String @unique
+  buyer_id   String @unique
+  product_id String @unique
+
+  store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  buyer   User    @relation(fields: [buyer_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@map("SalesHistory")
 }
