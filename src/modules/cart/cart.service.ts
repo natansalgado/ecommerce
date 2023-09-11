@@ -90,7 +90,7 @@ export class CartService {
   async getCartItems(user: UpdateUserDTO) {
     const cart = await this.prisma.cart.findUnique({
       where: { user_id: user.id },
-      include: { cartItems: true },
+      include: { cartItems: { include: { product: true } } },
     });
 
     return cart;

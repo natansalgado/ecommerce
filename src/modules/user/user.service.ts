@@ -71,12 +71,12 @@ export class UserService {
 
     if (!userExists) throw new NotFoundException("User doesn't exists");
 
-    if (userExists.id === user.id || user.admin)
-      return await this.prisma.user.update({ data, where: { id } });
-    else
+    if (!(userExists.id === user.id || user.admin))
       throw new UnauthorizedException(
         'Only the user himself or an admin can update his account',
       );
+
+    return await this.prisma.user.update({ data, where: { id } });
   }
 
   async delete(id: string, user: UpdateUserDTO) {
@@ -84,13 +84,13 @@ export class UserService {
 
     if (!userExists) throw new NotFoundException("User doesn't exists");
 
-    if (userExists.id === user.id || user.admin) {
-      await this.prisma.user.delete({ where: { id } });
-      return { success: `User '${userExists.name}' deleted` };
-    } else
+    if (!(userExists.id === user.id || user.admin))
       throw new UnauthorizedException(
         'Only the user himself or an admin can delete his account',
       );
+
+    await this.prisma.user.delete({ where: { id } });
+    return { success: `User '${userExists.name}' deleted` };
   }
 
   async validateEmail(email: string) {

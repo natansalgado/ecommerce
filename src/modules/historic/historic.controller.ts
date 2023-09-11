@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Request as Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Param,
+  Request as Req,
+} from '@nestjs/common';
 import { HistoricService } from './historic.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -13,5 +20,19 @@ export class HistoricController {
   @ApiBearerAuth()
   create(@Req() req: Request) {
     return this.historicService.create(req.user);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  getUserHistorics(@Req() req: Request) {
+    return this.historicService.getUserHistorics(req.user);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  getOneHistoric(@Req() req: Request, @Param('id') id: string) {
+    return this.historicService.getOneHistoric(req.user, id);
   }
 }

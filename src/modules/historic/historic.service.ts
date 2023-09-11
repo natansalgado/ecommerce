@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import { UpdateUserDTO } from '../user/dto/update-user.dto';
@@ -68,6 +69,29 @@ export class HistoricService {
     });
 
     return { historic: { ...historic, historicItems } };
+  }
+
+  async getUserHistorics(user: UpdateUserDTO) {
+    return await this.prisma.historic.findMany({
+      where: { user_id: user.id },
+      include: { historic_items: { include: { product: true } } },
+    });
+  }
+
+  async getOneHistoric(user: UpdateUserDTO, id: string) {
+    const historic = await this.prisma.historic.findUnique({
+      where: { id },
+      include: { historic_items: { include: { product: true } } },
+    });
+
+    if (!historic) throw new NotFoundException('Historic not found');
+
+    if (!(historic.user_id === user.id || user.admin))
+      throw new UnauthorizedException(
+        'Only the user or a adimin can see the historic',
+      );
+
+    return historic;
   }
 
   async verifyProductQuantity(cartItems: CartItemDTO[]) {

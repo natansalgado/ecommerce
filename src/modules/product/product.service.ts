@@ -43,12 +43,12 @@ export class ProductService {
 
     if (!productExists) throw new NotFoundException("Product doesn't exists");
 
-    if (productExists.vendor_id === user.id || user.admin)
-      return await this.prisma.product.update({ data, where: { id } });
-    else
+    if (!(productExists.vendor_id === user.id || user.admin))
       throw new UnauthorizedException(
         'Only the vendor or an admin can update the product',
       );
+
+    return await this.prisma.product.update({ data, where: { id } });
   }
 
   async delete(id: string, user: UpdateUserDTO) {
@@ -58,12 +58,12 @@ export class ProductService {
 
     if (!productExists) throw new NotFoundException("Product doesn't exists");
 
-    if (productExists.vendor_id === user.id || user.admin) {
-      await this.prisma.product.delete({ where: { id } });
-      return { success: `Product '${productExists.title}' deleted` };
-    } else
+    if (!(productExists.vendor_id === user.id || user.admin))
       throw new UnauthorizedException(
         'Only the vendor or an admin can delete the product',
       );
+
+    await this.prisma.product.delete({ where: { id } });
+    return { success: `Product '${productExists.title}' deleted` };
   }
 }
