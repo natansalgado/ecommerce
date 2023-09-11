@@ -36,5 +36,7 @@
 
 > STORES:
 > - POST: '/store' - To create a store (need to be logged in and need a name).
+> - GET: '/store/sales' - To show the store sales history.
+> - GET: '/store/sale/:id' - To show a sale by id.
 > - GET: '/store' - To show all the stores and its products.
 > - GET: '/store/:id' - To show a specific store and its products.

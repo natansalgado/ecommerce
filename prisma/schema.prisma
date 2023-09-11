@@ -124,10 +124,12 @@ model Store {
 }
 
 model SaleHistory {
-  id         String @id @default(uuid())
-  store_id   String @unique
-  buyer_id   String @unique
-  product_id String @unique
+  id         String  @id @default(uuid())
+  store_id   String  @unique
+  buyer_id   String  @unique
+  product_id String  @unique
+  quantity   Int
+  price      Decimal @db.Decimal(9, 2)
 
   store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
   buyer   User    @relation(fields: [buyer_id], references: [id], onDelete: Cascade)

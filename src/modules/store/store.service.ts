@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import { UpdateUserDTO } from '../user/dto/update-user.dto';
@@ -53,5 +54,36 @@ export class StoreService {
     if (!store) throw new NotFoundException("Store doesn't exists");
 
     return store;
+  }
+
+  async getSalesHistory(user: UpdateUserDTO) {
+    const store = await this.prisma.store.findUnique({
+      where: { owner_id: user.id },
+    });
+
+    if (!store) throw new NotFoundException("Store doesn't exists");
+
+    return await this.prisma.saleHistory.findMany({
+      where: { store_id: store.id },
+    });
+  }
+
+  async getOneSale(user: UpdateUserDTO, id: string) {
+    const sale = await this.prisma.saleHistory.findUnique({ where: { id } });
+
+    if (!sale) throw new NotFoundException('Sale Not found');
+
+    const store = await this.prisma.store.findUnique({
+      where: { owner_id: user.id },
+    });
+
+    if (!store) throw new NotFoundException("Store doesn't exists");
+
+    if (!(sale.store_id === store.id || user.admin))
+      throw new UnauthorizedException(
+        'Only the store owner or a admin can see the history',
+      );
+
+    return sale;
   }
 }

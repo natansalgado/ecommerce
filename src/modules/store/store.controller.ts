@@ -23,6 +23,20 @@ export class StoreController {
     return this.storeService.createStore(req.user, name);
   }
 
+  @Get('sales')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  getSalesHistory(@Req() req: Request) {
+    return this.storeService.getSalesHistory(req.user);
+  }
+
+  @Get('sale/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  getOneSale(@Req() req: Request, @Param('id') id: string) {
+    return this.storeService.getOneSale(req.user, id);
+  }
+
   @Get()
   getAllStores() {
     return this.storeService.getAllStores();
