@@ -25,4 +25,11 @@
 > CARTS:
 >
 > - POST: '/cart/add' - To add a product in the cart of the logged in user (needs a 'productId' and 'quantity').
+> - DELETE: '/cart/empty' - To empty the user cart.
+> - GET: '/cart/' - To get all the products in the cart.
 > Using a negative number in the quantity will remove the passed quantity.
+
+> HISTORICS:
+> - POST: '/historic' - To finish the purchase of the products in the cart and create a purchase history.
+> - GET: '/historic' - To get all the purchase history.
+> - GET: '/historic/:id' - To get a specific purchase history.
