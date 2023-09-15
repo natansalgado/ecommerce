@@ -20,6 +20,7 @@ export class CartService {
 
     let cart = await this.prisma.cart.findFirst({
       where: { user_id: user.id },
+      include: { cartItems: true },
     });
 
     if (!cart) {
@@ -27,8 +28,16 @@ export class CartService {
         data: {
           user: { connect: { id: user.id } },
         },
+        include: { cartItems: true },
       });
     }
+
+    const itemInCart = cart.cartItems.find(
+      (item) => item.product_id === productId,
+    );
+
+    if (itemInCart && itemInCart.quantity + quantity > product.quantity)
+      throw new BadRequestException('Insuficient product quantity');
 
     const cartItemExists = await this.prisma.cartItem.findFirst({
       where: { cart_id: cart.id, product_id: productId },
@@ -126,5 +135,14 @@ export class CartService {
     } else {
       return false;
     }
+  }
+
+  async productInCart(user: UpdateUserDTO, productId: string) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { user_id: user.id },
+      include: { cartItems: { where: { product_id: productId } } },
+    });
+
+    return cart.cartItems[0];
   }
 }

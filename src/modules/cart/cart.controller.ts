@@ -6,6 +6,7 @@ import {
   Request,
   UseGuards,
   Body,
+  Param,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import express from 'express';
@@ -38,5 +39,12 @@ export class CartController {
   @ApiBearerAuth()
   getCartItems(@Request() req: express.Request) {
     return this.cartService.getCartItems(req.user);
+  }
+
+  @Get('product/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  productInCart(@Request() req: express.Request, @Param('id') id: string) {
+    return this.cartService.productInCart(req.user, id);
   }
 }
