@@ -32,7 +32,7 @@ export class CreateProductDTO {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  image_urls: string;
+  image_url: string;
 
   @ApiProperty()
   @IsInt()

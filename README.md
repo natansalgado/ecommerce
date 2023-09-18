@@ -18,8 +18,8 @@
 >
 > - GET: '/product' - To show all products.
 > - GET: '/product/:id' - To find a product by id.
-> - POST: '/product' - To create a product (needs a 'title', 'description', 'price' and 'image_urls' (the images_urls is a string of URLs separated by ',')).
-> - PUT: '/product/:id - To update a product (can pass a 'title', 'description', 'price' and 'image_urls').
+> - POST: '/product' - To create a product (needs a 'title', 'description', 'price' and 'image_url)'
+> - PUT: '/product/:id - To update a product (can pass a 'title', 'description', 'price' and 'image_url').
 > - DELETE '/product/:id - To delete a product.
 
 > CARTS:
@@ -27,6 +27,7 @@
 > - POST: '/cart/add' - To add a product in the cart of the logged in user (needs a 'productId' and 'quantity').
 > - DELETE: '/cart/empty' - To empty the user cart.
 > - GET: '/cart/' - To get all the products in the cart.
+> - GET: '/cart/product/:id' - To get a specific product in the user cart.
 > Using a negative number in the quantity will remove the passed quantity.
 
 > HISTORICS:

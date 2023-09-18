@@ -32,7 +32,7 @@ model Product {
   title       String
   description String
   price       Decimal @db.Decimal(9, 2)
-  image_urls  String
+  image_url  String
   ratings     Int     @default(0)
   stars       Int     @default(0)
   sold        Int     @default(0)
