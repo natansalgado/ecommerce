@@ -41,3 +41,7 @@
 > - GET: '/store/sale/:id' - To show a sale by id.
 > - GET: '/store' - To show all the stores and its products.
 > - GET: '/store/:id' - To show a specific store and its products.
+
+> DEPOSITS:
+> - POST: '/deposit' - To add a amount to a account (need to be logged in and need a value).
+> - DELETE: '/deposit/:id' - To reset the user balance (need to be a admin).
