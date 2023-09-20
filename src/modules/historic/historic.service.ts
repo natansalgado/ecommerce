@@ -75,6 +75,7 @@ export class HistoricService {
     return await this.prisma.historic.findMany({
       where: { user_id: user.id },
       include: { historic_items: { include: { product: true } } },
+      orderBy: { created_at: 'desc' },
     });
   }
 
@@ -114,7 +115,10 @@ export class HistoricService {
       cartItems.map(async (item) => {
         await this.prisma.product.update({
           where: { id: item.product_id },
-          data: { quantity: { decrement: item.quantity } },
+          data: {
+            quantity: { decrement: item.quantity },
+            sold: { increment: 1 },
+          },
         });
       }),
     );
