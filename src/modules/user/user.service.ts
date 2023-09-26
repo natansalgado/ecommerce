@@ -62,6 +62,17 @@ export class UserService {
   }
 
   async update(id: string, data: UpdateUserDTO, user: UpdateUserDTO) {
+    const validPassword = await this.validatePassword(data.password);
+    if (!validPassword && data.password)
+      throw new NotAcceptableException(
+        'The password must have at least 8 characters, including one uppercase letter, one lowercase letter, and one number',
+      );
+
+    if (!data.password) data.password = undefined;
+
+    const validEmail = await this.validateEmail(data.email);
+    if (!validEmail) throw new NotAcceptableException('Use a valid Email');
+
     if (data.password) {
       const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
       data.password = hashedPassword;

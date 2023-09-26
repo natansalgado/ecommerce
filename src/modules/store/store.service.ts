@@ -86,4 +86,15 @@ export class StoreService {
 
     return sale;
   }
+
+  async getMyStore(user: UpdateUserDTO) {
+    const store = await this.prisma.store.findUnique({
+      where: { owner_id: user.id },
+      include: { products: { orderBy: { created_at: 'desc' } } },
+    });
+
+    if (!store) throw new NotFoundException('Store not found');
+
+    return store;
+  }
 }

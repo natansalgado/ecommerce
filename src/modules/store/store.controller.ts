@@ -42,6 +42,13 @@ export class StoreController {
     return this.storeService.getAllStores();
   }
 
+  @Get('mystore')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  getMyStore(@Req() req: Request) {
+    return this.storeService.getMyStore(req.user);
+  }
+
   @Get(':id')
   getOneStore(@Param('id') id: string) {
     return this.storeService.getOneStore(id);
