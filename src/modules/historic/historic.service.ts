@@ -15,7 +15,9 @@ export class HistoricService {
   async create(user: UpdateUserDTO) {
     const cart = await this.prisma.cart.findUnique({
       where: { user_id: user.id },
-      include: { cartItems: true },
+      include: {
+        cartItems: { include: { product: { select: { store_id: true } } } },
+      },
     });
 
     if (!cart) throw new NotFoundException("Cart doesn't exists");
@@ -37,6 +39,8 @@ export class HistoricService {
 
     cartItems.map((item) => {
       total_price += Number(item.price);
+
+      this.addStoreBalance(item);
     });
 
     await this.prisma.user.update({
@@ -71,6 +75,13 @@ export class HistoricService {
     return { historic: { ...historic, historicItems } };
   }
 
+  async addStoreBalance(item: CartItemDTO) {
+    await this.prisma.store.update({
+      where: { id: item.product.store_id },
+      data: { balance: { increment: item.price } },
+    });
+  }
+
   async getUserHistorics(user: UpdateUserDTO) {
     return await this.prisma.historic.findMany({
       where: { user_id: user.id },
@@ -97,6 +108,7 @@ export class HistoricService {
 
   async verifyProductQuantity(cartItems: CartItemDTO[]) {
     const insufficientProducts = [];
+
     await Promise.all(
       cartItems.map(async (item) => {
         const product = await this.prisma.product.findUnique({
@@ -107,6 +119,7 @@ export class HistoricService {
           insufficientProducts.push(product.title);
       }),
     );
+
     return insufficientProducts;
   }
 

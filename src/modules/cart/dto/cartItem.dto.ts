@@ -1,5 +1,13 @@
-import { IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsDecimal,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UpdateProductDTO } from 'src/modules/product/dto/update-product.dto';
+import { Decimal } from '@prisma/client/runtime/library';
 
 export class CartItemDTO {
   @ApiProperty()
@@ -21,4 +29,11 @@ export class CartItemDTO {
   @IsNumber()
   @IsNotEmpty()
   quantity?: number;
+
+  @ApiProperty()
+  @IsDecimal({ decimal_digits: '2' })
+  @IsNotEmpty()
+  price?: Decimal;
+
+  product?: UpdateProductDTO;
 }
