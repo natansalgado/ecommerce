@@ -19,10 +19,9 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  carts       Cart[]
-  historics   Historic[]
-  store       Store?
-  saleHistory SaleHistory[]
+  carts     Cart[]
+  historics Historic[]
+  store     Store?
 
   @@map("users")
 }
@@ -32,7 +31,7 @@ model Product {
   title       String
   description String
   price       Decimal @db.Decimal(9, 2)
-  image_url  String
+  image_url   String
   ratings     Int     @default(0)
   stars       Int     @default(0)
   sold        Int     @default(0)
@@ -44,7 +43,6 @@ model Product {
 
   carts          CartItem[]
   historic_items HistoricItem[]
-  saleHistory    SaleHistory?
 
   store Store? @relation(fields: [store_id], references: [id], onDelete: Cascade)
 
@@ -102,6 +100,9 @@ model HistoricItem {
   quantity    Int
   price       Decimal @db.Decimal(9, 2)
 
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
   product  Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
   historic Historic @relation(fields: [historic_id], references: [id], onDelete: Cascade)
 
@@ -115,25 +116,12 @@ model Store {
   owner_id String  @unique
   balance  Decimal @db.Decimal(9, 2)
 
-  products    Product[]
-  saleHistory SaleHistory[]
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  products Product[]
 
   owner User @relation(fields: [owner_id], references: [id], onDelete: Cascade)
 
   @@map("Stores")
-}
-
-model SaleHistory {
-  id         String  @id @default(uuid())
-  store_id   String  @unique
-  buyer_id   String  @unique
-  product_id String  @unique
-  quantity   Int
-  price      Decimal @db.Decimal(9, 2)
-
-  store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
-  buyer   User    @relation(fields: [buyer_id], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
-
-  @@map("SalesHistory")
 }

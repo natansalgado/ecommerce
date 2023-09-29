@@ -6,9 +6,19 @@ import { CartModule } from './modules/cart/cart.module';
 import { HistoricModule } from './modules/historic/historic.module';
 import { StoreModule } from './modules/store/store.module';
 import { DepositModule } from './modules/deposit/deposit.module';
+import { SaleModule } from './modules/sale/sale.module';
 
 @Module({
-  imports: [UserModule, ProductModule, AuthModule, CartModule, HistoricModule, StoreModule, DepositModule],
+  imports: [
+    UserModule,
+    ProductModule,
+    AuthModule,
+    CartModule,
+    HistoricModule,
+    StoreModule,
+    DepositModule,
+    SaleModule,
+  ],
   controllers: [],
   providers: [],
 })
