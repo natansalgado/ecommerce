@@ -2,7 +2,7 @@ import {
   Controller,
   Get,
   UseGuards,
-  // Param,
+  Param,
   Request as Req,
 } from '@nestjs/common';
 import { SaleService } from './sale.service';
@@ -21,10 +21,10 @@ export class SaleController {
     return this.saleService.getAllStoreSales(req.user);
   }
 
-  // @Get(':id')
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
-  // getOneSale(@Req() req: Request, @Param('id') id: string) {
-  //   //return this.saleService.getOneSale(req.user, id);
-  // }
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  getOneSale(@Req() req: Request, @Param('id') id: string) {
+    return this.saleService.getOneProductSales(req.user, id);
+  }
 }

@@ -1,4 +1,3 @@
-
 # ECOMMERCE
 
 > LOGIN:
@@ -28,20 +27,26 @@
 > - DELETE: '/cart/empty' - To empty the user cart.
 > - GET: '/cart/' - To get all the products in the cart.
 > - GET: '/cart/product/:id' - To get a specific product in the user cart.
-> Using a negative number in the quantity will remove the passed quantity.
+>   Using a negative number in the quantity will remove the passed quantity.
 
 > HISTORICS:
+>
 > - POST: '/historic' - To finish the purchase of the products in the cart and create a purchase history.
 > - GET: '/historic' - To get all the purchase history.
 > - GET: '/historic/:id' - To get a specific purchase history.
 
 > STORES:
+>
 > - POST: '/store' - To create a store (need to be logged in and need a name).
-> - GET: '/store/sales' - To show the store sales history.
-> - GET: '/store/sale/:id' - To show a sale by id.
 > - GET: '/store' - To show all the stores and its products.
 > - GET: '/store/:id' - To show a specific store and its products.
 
+> SALES:
+>
+> - GET: 'sale' - To show all the store sales historic.
+> - GET: 'sale/:id' - To show all the sales of one specific product.
+
 > DEPOSITS:
+>
 > - POST: '/deposit' - To add a amount to a account (need to be logged in and need a value).
 > - DELETE: '/deposit/:id' - To reset the user balance (need to be a admin).
