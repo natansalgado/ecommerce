@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/database/PrismaService';
+import { PrismaService } from '../../database/PrismaService';
 import { UpdateUserDTO } from '../user/dto/update-user.dto';
 
 @Injectable()

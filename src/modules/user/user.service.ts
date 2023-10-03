@@ -5,10 +5,11 @@ import {
   NotAcceptableException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/database/PrismaService';
+import { PrismaService } from '../../database/PrismaService';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
+import { Decimal } from '@prisma/client/runtime/library';
 
 export const roundsOfHashing = 10;
 
@@ -29,7 +30,7 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
 
     data.password = hashedPassword;
-    data.balance = 0;
+    data.balance = new Decimal(0);
     data.admin = false;
 
     const userExists = await this.prisma.user.findFirst({

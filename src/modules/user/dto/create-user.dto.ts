@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Decimal } from '@prisma/client/runtime/library';
 import {
   IsBoolean,
   IsDate,
@@ -38,12 +39,12 @@ export class CreateUserDTO {
   @ApiProperty()
   @IsOptional()
   @IsDecimal({ decimal_digits: '2' })
-  balance?: number;
+  balance?: Decimal;
 
   @ApiProperty()
   @IsOptional()
   @IsBoolean()
-  admin: boolean;
+  admin?: boolean;
 
   @ApiProperty()
   @IsOptional()
