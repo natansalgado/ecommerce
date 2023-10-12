@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsDate,
 } from 'class-validator';
+import { Decimal } from '@prisma/client/runtime/library';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDTO {
@@ -27,7 +28,7 @@ export class CreateProductDTO {
   @ApiProperty()
   @IsDecimal({ decimal_digits: '2' })
   @IsNotEmpty()
-  price: number;
+  price: Decimal;
 
   @ApiProperty()
   @IsString()

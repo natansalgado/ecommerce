@@ -13,10 +13,10 @@ import * as bcrypt from 'bcrypt';
 
 const fakeUser = {
   id: '1',
-  name: 'John Carvalho',
+  name: 'John Test',
   email: 'john@email.com',
-  password: 'Senha123',
-  address: 'Av. Cachoeira 324',
+  password: 'Password123',
+  address: 'Av. Street 123',
   balance: new Decimal(0),
   admin: false,
   created_at: new Date(),
@@ -30,7 +30,7 @@ const fakeCart = {
 const prismaMock = {
   user: {
     create: jest.fn().mockReturnValue(fakeUser),
-    findMany: jest.fn().mockResolvedValue(fakeUser),
+    findMany: jest.fn().mockResolvedValue([fakeUser]),
     findUnique: jest.fn().mockResolvedValue(fakeUser),
     findFirst: jest.fn().mockResolvedValue(fakeUser),
     update: jest.fn().mockResolvedValue(fakeUser),
@@ -128,7 +128,7 @@ describe('UserService', () => {
     it('should return an array of users', async () => {
       const response = await service.findAll();
 
-      expect(response).toEqual(fakeUser);
+      expect(response).toEqual([fakeUser]);
       expect(prisma.user.findMany).toHaveBeenCalledTimes(1);
       expect(prisma.user.findMany).toHaveBeenCalledWith();
     });
@@ -170,21 +170,9 @@ describe('UserService', () => {
       password: 'NewPassword123',
     };
 
-    const existingUser = {
-      id: '1',
-      name: 'Old User',
-      email: 'old@example.com',
-      password: 'OldHashedPassword123',
-      address: '123 Main St',
-      balance: new Decimal(0),
-      admin: false,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-
     it('should update the user', async () => {
       const updatedUser = {
-        ...existingUser,
+        ...fakeUser,
         ...updateUserDto,
         password: 'NewHashedPassword123',
       };
@@ -194,12 +182,12 @@ describe('UserService', () => {
         .mockResolvedValue('NewHashedPassword123');
 
       jest.spyOn(bcrypt, 'hash').mockImplementation(bcryptHashMock);
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(existingUser);
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(fakeUser);
       jest.spyOn(prisma.user, 'update').mockResolvedValue(updatedUser);
 
-      const result = await service.update(userId, updateUserDto, existingUser);
+      const response = await service.update(userId, updateUserDto, fakeUser);
 
-      expect(result).toEqual(updatedUser);
+      expect(response).toEqual(updatedUser);
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
