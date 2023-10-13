@@ -74,6 +74,34 @@ describe('productService', () => {
     jest.clearAllMocks();
   });
 
+  describe('create', () => {
+    it('should create a product', async () => {
+      const response = await service.create(fakeProduct, fakeUser);
+
+      expect(response).toEqual(fakeProduct);
+      expect(prisma.store.findUnique).toHaveBeenCalledWith({
+        where: { owner_id: fakeUser.id },
+      });
+      expect(prisma.product.create).toHaveBeenCalledWith({ data: fakeProduct });
+    });
+
+    it('should throw a NotFoundException if the store does not exist', async () => {
+      jest.spyOn(prisma.store, 'findUnique').mockResolvedValue(null);
+
+      try {
+        await service.create(fakeProduct, fakeUser);
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error.message).toBe("Store doesn't exists");
+      }
+
+      expect(prisma.store.findUnique).toHaveBeenCalledWith({
+        where: { owner_id: fakeUser.id },
+      });
+      expect(prisma.product.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('findAll', () => {
     it('should return all the products', async () => {
       const response = await service.findAll();
@@ -115,34 +143,6 @@ describe('productService', () => {
     });
   });
 
-  describe('create', () => {
-    it('should create a product', async () => {
-      const response = await service.create(fakeProduct, fakeUser);
-
-      expect(response).toEqual(fakeProduct);
-      expect(prisma.store.findUnique).toHaveBeenCalledWith({
-        where: { owner_id: fakeUser.id },
-      });
-      expect(prisma.product.create).toHaveBeenCalledWith({ data: fakeProduct });
-    });
-
-    it('should throw a NotFoundException if the store does not exist', async () => {
-      jest.spyOn(prisma.store, 'findUnique').mockResolvedValue(null);
-
-      try {
-        await service.create(fakeProduct, fakeUser);
-      } catch (error) {
-        expect(error).toBeInstanceOf(NotFoundException);
-        expect(error.message).toBe("Store doesn't exists");
-      }
-
-      expect(prisma.store.findUnique).toHaveBeenCalledWith({
-        where: { owner_id: fakeUser.id },
-      });
-      expect(prisma.product.create).not.toHaveBeenCalled();
-    });
-  });
-
   describe('update', () => {
     const productId = '1';
 
@@ -152,23 +152,23 @@ describe('productService', () => {
       sold: 2,
     };
 
+    const updatedProduct = {
+      ...fakeProduct,
+      ...updateProductDto,
+    };
+
     it('should update the product as the store owner', async () => {
       jest.spyOn(prisma.product, 'findUnique').mockResolvedValue(fakeProduct);
       jest.spyOn(prisma.store, 'findUnique').mockResolvedValue(fakeStore);
-      jest
-        .spyOn(prisma.product, 'update')
-        .mockResolvedValue({ ...fakeProduct, ...updateProductDto });
+      jest.spyOn(prisma.product, 'update').mockResolvedValue(updatedProduct);
 
       const response = await service.update(
         productId,
-        { ...fakeProduct, ...updateProductDto },
+        updateProductDto,
         fakeUser,
       );
 
-      expect(response).toEqual({
-        ...fakeProduct,
-        ...updateProductDto,
-      });
+      expect(response).toEqual(updatedProduct);
       expect(prisma.product.findUnique).toBeCalledWith({
         where: { id: productId },
       });
@@ -176,7 +176,7 @@ describe('productService', () => {
         where: { owner_id: fakeUser.id },
       });
       expect(prisma.product.update).toBeCalledWith({
-        data: { ...fakeProduct, ...updateProductDto },
+        data: updateProductDto,
         where: { id: productId },
       });
     });
@@ -186,20 +186,14 @@ describe('productService', () => {
         .spyOn(prisma.product, 'findUnique')
         .mockResolvedValue({ ...fakeProduct, store_id: '123' });
       jest.spyOn(prisma.store, 'findUnique').mockResolvedValue(fakeStore);
-      jest
-        .spyOn(prisma.product, 'update')
-        .mockResolvedValue({ ...fakeProduct, ...updateProductDto });
+      jest.spyOn(prisma.product, 'update').mockResolvedValue(updatedProduct);
 
-      const response = await service.update(
-        productId,
-        { ...fakeProduct, ...updateProductDto },
-        { ...fakeUser, admin: true },
-      );
-
-      expect(response).toEqual({
-        ...fakeProduct,
-        ...updateProductDto,
+      const response = await service.update(productId, updateProductDto, {
+        ...fakeUser,
+        admin: true,
       });
+
+      expect(response).toEqual(updatedProduct);
       expect(prisma.product.findUnique).toBeCalledWith({
         where: { id: productId },
       });
@@ -207,7 +201,7 @@ describe('productService', () => {
         where: { owner_id: fakeUser.id },
       });
       expect(prisma.product.update).toBeCalledWith({
-        data: { ...fakeProduct, ...updateProductDto },
+        data: updateProductDto,
         where: { id: productId },
       });
     });
