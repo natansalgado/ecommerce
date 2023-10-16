@@ -42,9 +42,9 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   update(
-    @Request() req: Express.Request,
     @Param('id') id: string,
     @Body() data: UpdateUserDTO,
+    @Request() req: Express.Request,
   ) {
     return this.userService.update(id, data, req.user);
   }

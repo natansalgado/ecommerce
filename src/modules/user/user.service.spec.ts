@@ -7,7 +7,6 @@ import {
 import { PrismaService } from '../../database/PrismaService';
 import { UserService } from './user.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UpdateUserDTO } from './dto/update-user.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 
@@ -172,7 +171,7 @@ describe('UserService', () => {
   describe('update', () => {
     const userId = '1';
 
-    const updateUserDto: UpdateUserDTO = {
+    const updateUserDto = {
       name: 'Updated User',
       email: 'updated@example.com',
       password: 'NewPassword123',
@@ -185,9 +184,6 @@ describe('UserService', () => {
     };
 
     it('should update the user as himself', async () => {
-      const bcryptHashMock = jest.fn().mockResolvedValue('HashedPassword123');
-      jest.spyOn(bcrypt, 'hash').mockImplementation(bcryptHashMock);
-
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(fakeUser);
       jest.spyOn(prisma.user, 'update').mockResolvedValue(updatedUser);
 
