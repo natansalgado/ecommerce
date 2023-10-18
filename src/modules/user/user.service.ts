@@ -3,7 +3,6 @@ import {
   NotFoundException,
   ConflictException,
   NotAcceptableException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/PrismaService';
 import * as bcrypt from 'bcrypt';
@@ -64,7 +63,7 @@ export class UserService {
     return userExists;
   }
 
-  async update(id: string, data: UpdateUserDTO, user: UpdateUserDTO) {
+  async update(id: string, data: UpdateUserDTO) {
     const validPassword = await this.validatePassword(data.password);
 
     if (!validPassword && data.password)
@@ -87,23 +86,13 @@ export class UserService {
 
     if (!userExists) throw new NotFoundException("User doesn't exists");
 
-    if (!(userExists.id === user.id || user.admin))
-      throw new UnauthorizedException(
-        'Only the user himself or an admin can update his account',
-      );
-
     return await this.prisma.user.update({ data, where: { id } });
   }
 
-  async delete(id: string, user: UpdateUserDTO) {
+  async delete(id: string) {
     const userExists = await this.prisma.user.findUnique({ where: { id } });
 
     if (!userExists) throw new NotFoundException("User doesn't exists");
-
-    if (!(userExists.id === user.id || user.admin))
-      throw new UnauthorizedException(
-        'Only the user himself or an admin can delete his account',
-      );
 
     await this.prisma.user.delete({ where: { id } });
     return { success: `User '${userExists.name}' deleted` };

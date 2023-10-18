@@ -2,13 +2,11 @@ import {
   NotFoundException,
   ConflictException,
   NotAcceptableException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/PrismaService';
 import { UserService } from './user.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Decimal } from '@prisma/client/runtime/library';
-import * as bcrypt from 'bcrypt';
 
 const fakeUser = {
   id: '1',
@@ -183,34 +181,11 @@ describe('UserService', () => {
       password: 'HashedPassword123',
     };
 
-    it('should update the user as himself', async () => {
+    it('should update the user', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(fakeUser);
       jest.spyOn(prisma.user, 'update').mockResolvedValue(updatedUser);
 
-      const response = await service.update(userId, updateUserDto, fakeUser);
-
-      expect(response).toEqual(updatedUser);
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: userId },
-      });
-      expect(prisma.user.update).toHaveBeenCalledWith({
-        data: updateUserDto,
-        where: { id: userId },
-      });
-    });
-
-    it('should update the user as administrator', async () => {
-      const bcryptHashMock = jest.fn().mockResolvedValue('HashedPassword123');
-      jest.spyOn(bcrypt, 'hash').mockImplementation(bcryptHashMock);
-
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(fakeUser);
-      jest.spyOn(prisma.user, 'update').mockResolvedValue(updatedUser);
-
-      const response = await service.update(userId, updateUserDto, {
-        ...fakeUser,
-        id: '3',
-        admin: true,
-      });
+      const response = await service.update(userId, updateUserDto);
 
       expect(response).toEqual(updatedUser);
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
@@ -226,14 +201,7 @@ describe('UserService', () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
       try {
-        await service.update(
-          userId,
-          {
-            ...fakeUser,
-            name: 'Not Found User',
-          },
-          { id: '1', admin: false },
-        );
+        await service.update(userId, fakeUser);
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException);
         expect(error.message).toBe("User doesn't exists");
@@ -245,7 +213,7 @@ describe('UserService', () => {
 
     it('should throw a NotAcceptableException if user to be updated use an invalid password', async () => {
       try {
-        await service.update(userId, { ...fakeUser, password: 'invalid' }, {});
+        await service.update(userId, { ...fakeUser, password: 'invalid' });
       } catch (error) {
         expect(error).toBeInstanceOf(NotAcceptableException);
         expect(error.message).toBe(
@@ -259,7 +227,7 @@ describe('UserService', () => {
 
     it('should throw a NotAcceptableException if user to be updated use an invalid email', async () => {
       try {
-        await service.update(userId, { ...fakeUser, email: 'invalid' }, {});
+        await service.update(userId, { ...fakeUser, email: 'invalid' });
       } catch (error) {
         expect(error).toBeInstanceOf(NotAcceptableException);
         expect(error.message).toBe('Use a valid Email');
@@ -268,51 +236,15 @@ describe('UserService', () => {
       expect(prisma.user.findUnique).not.toHaveBeenCalled();
       expect(prisma.user.update).not.toHaveBeenCalled();
     });
-
-    it('should throw a UnauthorizedException if is not the user himself nor a admin', async () => {
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(fakeUser);
-
-      try {
-        await service.update(userId, updateUserDto, { ...fakeUser, id: '3' });
-      } catch (error) {
-        expect(error).toBeInstanceOf(UnauthorizedException);
-        expect(error.message).toBe(
-          'Only the user himself or an admin can update his account',
-        );
-      }
-
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: userId },
-      });
-      expect(prisma.user.update).not.toHaveBeenCalled();
-    });
   });
 
   describe('delete', () => {
     const userId = '1';
 
-    it('should delete the user as himself', async () => {
-      const response = await service.delete(userId, fakeUser);
-
-      expect(response).toEqual({
-        success: `User '${fakeUser.name}' deleted`,
-      });
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: userId },
-      });
-      expect(prisma.user.delete).toHaveBeenCalledWith({
-        where: { id: userId },
-      });
-    });
-
-    it('should delete the user as administrator', async () => {
+    it('should delete the user', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(fakeUser);
 
-      const response = await service.delete(userId, {
-        ...fakeUser,
-        id: '3',
-        admin: true,
-      });
+      const response = await service.delete(userId);
 
       expect(response).toEqual({
         success: `User '${fakeUser.name}' deleted`,
@@ -329,7 +261,7 @@ describe('UserService', () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
       try {
-        await service.delete(userId, fakeUser);
+        await service.delete(userId);
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException);
         expect(error.message).toBe("User doesn't exists");
@@ -338,16 +270,6 @@ describe('UserService', () => {
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
       });
-    });
-
-    it('should throw an UnauthorizedException if user to be deleted is not the user himself', async () => {
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(fakeUser);
-
-      try {
-        await service.delete(userId, { ...fakeUser, id: '3' });
-      } catch (error) {
-        expect(error).toBeInstanceOf(UnauthorizedException);
-      }
     });
   });
 });
